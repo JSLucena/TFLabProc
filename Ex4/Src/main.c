@@ -58,6 +58,12 @@ static void MX_ADC_Init(void);
 #define liga_led GPIOA->BSRR = (1 << 5);
 #define desliga_led GPIOA->BRR = (1 << 5);
 
+
+#define VERMELHO 0.5
+#define VERDE 3.0
+#define YELLOW 2.6
+#define AZUL 3.3
+
 void uDelay(void)
 {
   int x=10;
@@ -194,7 +200,51 @@ int fputc(int ch, FILE *f)
 	else if(aonde == 'S') HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 10);
 	return ch;
 }
+void print_color(float x)
+{
+	lcd_goto(0,0);
+	if( x <= VERMELHO)
+	{
+		printf("R");
+	}
+	else if(x <= YELLOW)
+	{
+		printf("Y");
+	}
+	else if(x <= VERDE)
+	{
+		printf("G");
+	}
+	else if(x <= AZUL)
+	{
+		printf("B");
+	}
+}
+	
 
+void move90neg()
+{
+		GPIOA->BSRR = 1 << 9;
+		HAL_Delay(1);
+		GPIOA->BRR = 1 << 9;
+		HAL_Delay(19);
+}
+void move0()
+{
+		GPIOA->BSRR = 1 << 9;
+		HAL_Delay(1);
+		delayUs(500);
+		GPIOA->BRR = 1 << 9;
+		HAL_Delay(18);
+		delayUs(500);
+}
+void move90pos()
+{
+	GPIOA->BSRR = 1 << 9;
+		HAL_Delay(2);
+		GPIOA->BRR = 1 << 9;
+		HAL_Delay(18);
+}
 /* USER CODE END 0 */
 
 /**
@@ -238,7 +288,7 @@ int main(void)
 
   while (1)
   {
-		/*
+		
 		lcd_goto(12,0);
 		int x = le_AD();
 		print_AD(x);	
@@ -246,20 +296,12 @@ int main(void)
 		float t = v*100;		
 		lcd_goto(0,1);
 		aonde = 'L';
-		printf("%2.3f",v);	
-		*/
+		printf("%2.3f",v);
+		print_color(v);
 		
-	//x =	GPIOC->IDR;
-	//HAL_Delay(500);
-
-//	if((x & 1 << 13) == 0)
-	//{
-		GPIOA->BSRR = 1 << 9;
-		HAL_Delay(1);
-		GPIOA->BRR = 1 << 9;
-		HAL_Delay(19);
-//	}	
-//		HAL_Delay(400);				
+		
+	HAL_Delay(500);
+		
 
 		
     /* USER CODE END WHILE */
