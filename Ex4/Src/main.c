@@ -63,6 +63,7 @@ static void MX_ADC_Init(void);
 #define VERDE 3.0
 #define YELLOW 2.6
 #define AZUL 3.3
+#define BRANCO 0
 
 void uDelay(void)
 {
@@ -202,8 +203,28 @@ int fputc(int ch, FILE *f)
 }
 void print_color(float x)
 {
+	int i = 0;
+	
 	lcd_goto(0,0);
-	if( x <= VERMELHO)
+	if(x <= BRANCO)
+	{
+		printf("W");
+		for(i = 0; i <= 40;i++)
+		{
+			GPIOC->BSRR = 1 << 0;
+			HAL_Delay(2);
+			GPIOC->BRR = 1 << 0;
+			HAL_Delay(18);
+		}
+		for(i = 0; i <= 40;i++)
+		{
+			GPIOC->BSRR = 1 << 0;
+			HAL_Delay(1);
+			GPIOC->BRR = 1 << 0;
+			HAL_Delay(19);
+		}
+	}
+	else if( x <= VERMELHO)
 	{
 		printf("R");
 	}
@@ -244,6 +265,28 @@ void move90pos()
 		HAL_Delay(2);
 		GPIOA->BRR = 1 << 9;
 		HAL_Delay(18);
+}
+void calibra()
+{
+	GPIOA -> BSRR = 1 << 4;
+	lcd_goto(0,0);
+	printf("teste RRR");
+	HAL_Delay(3000);
+	GPIOA -> BRR = 1 << 4;
+	
+	GPIOB -> BSRR = 1 << 0;
+	lcd_goto(0,0);
+	printf("teste BBB");
+	HAL_Delay(3000);
+	GPIOB -> BRR = 1 << 0;
+	
+	GPIOC -> BSRR = 1 << 1;
+	lcd_goto(0,0);
+	printf("teste GGG");
+	HAL_Delay(3000);
+	GPIOC -> BRR = 1 << 1;
+
+	
 }
 /* USER CODE END 0 */
 
@@ -288,7 +331,7 @@ int main(void)
 
   while (1)
   {
-		
+	/*	
 		lcd_goto(12,0);
 		int x = le_AD();
 		print_AD(x);	
@@ -302,7 +345,8 @@ int main(void)
 		
 	HAL_Delay(500);
 		
-
+*/
+		calibra();
 		
     /* USER CODE END WHILE */
 
@@ -455,14 +499,15 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LD2_Pin|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, separador_Pin|green_Pin|GPIO_PIN_7|GPIO_PIN_10 
+                          |GPIO_PIN_11|GPIO_PIN_12, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6 
-                          |GPIO_PIN_7, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, red_Pin|LD2_Pin|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, blue_Pin|GPIO_PIN_10|GPIO_PIN_4|GPIO_PIN_5 
+                          |GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -470,32 +515,34 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD2_Pin PA8 PA9 */
-  GPIO_InitStruct.Pin = LD2_Pin|GPIO_PIN_8|GPIO_PIN_9;
+  /*Configure GPIO pins : separador_Pin green_Pin PC7 */
+  GPIO_InitStruct.Pin = separador_Pin|green_Pin|GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : red_Pin LD2_Pin PA8 PA9 */
+  GPIO_InitStruct.Pin = red_Pin|LD2_Pin|GPIO_PIN_8|GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : blue_Pin PB10 PB4 PB5 
+                           PB6 */
+  GPIO_InitStruct.Pin = blue_Pin|GPIO_PIN_10|GPIO_PIN_4|GPIO_PIN_5 
+                          |GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB2 PB11 */
   GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_11;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PB10 PB4 PB5 PB6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PC7 */
-  GPIO_InitStruct.Pin = GPIO_PIN_7;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_15;
