@@ -1,0 +1,16 @@
+sem ampop
+
+led vermelho:
+RR: 1.2V - 1.6V
+RG: 1.55V - 2.0V 
+RB: 1.6V - 1.9V 
+led azul:
+BR: 2.1V - 2.4V
+BG: 2.2V - 2.4V
+BB: 0.8V - 1.9V
+led verde:
+GR: 2.1V - 2.5V
+GG: 2.25 - 2.5V
+GB: 2.2V - 2.3V
+
+nada : > 2.6V 

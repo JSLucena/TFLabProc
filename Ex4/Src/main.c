@@ -201,70 +201,47 @@ int fputc(int ch, FILE *f)
 	else if(aonde == 'S') HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 10);
 	return ch;
 }
-void print_color(float x)
+void print_color(char x)
 {
-	int i = 0;
+	
 	
 	lcd_goto(0,0);
-	if(x <= BRANCO)
-	{
-		printf("W");
-		for(i = 0; i <= 40;i++)
-		{
-			GPIOC->BSRR = 1 << 0;
-			HAL_Delay(2);
-			GPIOC->BRR = 1 << 0;
-			HAL_Delay(18);
-		}
-		for(i = 0; i <= 40;i++)
-		{
-			GPIOC->BSRR = 1 << 0;
-			HAL_Delay(1);
-			GPIOC->BRR = 1 << 0;
-			HAL_Delay(19);
-		}
-	}
-	else if( x <= VERMELHO)
-	{
-		printf("R");
-	}
-	else if(x <= YELLOW)
-	{
-		printf("Y");
-	}
-	else if(x <= VERDE)
-	{
-		printf("G");
-	}
-	else if(x <= AZUL)
-	{
-		printf("B");
-	}
+	
+	printf("%c%c%c%c",x,x,x,x);
 }
 	
 
 void move90neg()
 {
-		GPIOA->BSRR = 1 << 9;
+		GPIOC->BSRR = 1 << 0;
 		HAL_Delay(1);
-		GPIOA->BRR = 1 << 9;
+		GPIOC->BRR = 1 << 0;
 		HAL_Delay(19);
 }
 void move0()
-{
-		GPIOA->BSRR = 1 << 9;
+{		int i = 0;
+	for(i = 0;i<5;i++)
+	{
+		GPIOC->BSRR = 1 << 0;
 		HAL_Delay(1);
-		delayUs(500);
-		GPIOA->BRR = 1 << 9;
+		delayUs(900);
+		GPIOC->BRR = 1 << 0;
 		HAL_Delay(18);
-		delayUs(500);
+		delayUs(100);
+	}
 }
 void move90pos()
 {
-	GPIOA->BSRR = 1 << 9;
-		HAL_Delay(2);
-		GPIOA->BRR = 1 << 9;
-		HAL_Delay(18);
+	
+	int i = 0;
+	for(i = 0;i<10;i++)
+	{
+		GPIOC->BSRR = 1 << 0;
+		HAL_Delay(1);
+		//delayUs(950);
+		GPIOC->BRR = 1 << 0;
+		HAL_Delay(11);
+	}
 }
 void calibra()
 {
@@ -288,6 +265,45 @@ void calibra()
 
 	
 }
+char detectaCor()
+{
+	float vR,vB,vG;
+	int x;
+
+	GPIOA -> BSRR = 1 << 4;
+	lcd_goto(12,0);
+	HAL_Delay(250);
+	x = le_AD();
+	print_AD(x);
+	HAL_Delay(250);
+	GPIOA -> BRR = 1 << 4;	
+	vR = (3.3*(float)x)/4095;
+
+	GPIOB -> BSRR = 1 << 0;
+	lcd_goto(12,0);
+	HAL_Delay(250);
+	x = le_AD();
+	print_AD(x);
+	HAL_Delay(250);
+	GPIOB -> BRR = 1 << 0;
+	vB = (3.3*(float)x)/4095;
+	
+	GPIOC -> BSRR = 1 << 1;
+	lcd_goto(12,0);
+	HAL_Delay(250);
+	x = le_AD();
+	print_AD(x);
+	HAL_Delay(250);
+	GPIOC -> BRR = 1 << 1;
+	vG = (3.3*(float)x)/4095;
+	if(vB > 2.6 && vR > 2.6 && vG > 2.6)
+		return 'N';
+		
+	if(vB < 2.0)
+		return 'B';
+	else return '?';
+	
+}
 /* USER CODE END 0 */
 
 /**
@@ -298,6 +314,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	int x;
+	char cor;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -335,8 +352,7 @@ int main(void)
 		lcd_goto(12,0);
 		int x = le_AD();
 		print_AD(x);	
-		float v = (3.3*(float)x)/4095;	
-		float t = v*100;		
+		float v = (3.3*(float)x)/4095;		
 		lcd_goto(0,1);
 		aonde = 'L';
 		printf("%2.3f",v);
@@ -346,8 +362,13 @@ int main(void)
 	HAL_Delay(500);
 		
 */
-		calibra();
-		
+		//calibra();
+		cor = detectaCor();
+		print_color(cor);
+		if(cor == 'B')
+			move0();
+		else
+			move90pos();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
