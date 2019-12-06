@@ -275,10 +275,13 @@ char detectaCor()
 	HAL_Delay(250);
 	x = le_AD();
 	print_AD(x);
+	
 	HAL_Delay(250);
 	GPIOA -> BRR = 1 << 4;	
 	vR = (3.3*(float)x)/4095;
-
+	lcd_goto(9,1);
+	printf("vR %2.3f",vR);
+	
 	GPIOB -> BSRR = 1 << 0;
 	lcd_goto(12,0);
 	HAL_Delay(250);
@@ -287,6 +290,8 @@ char detectaCor()
 	HAL_Delay(250);
 	GPIOB -> BRR = 1 << 0;
 	vB = (3.3*(float)x)/4095;
+	lcd_goto(9,1);
+	printf("vB %2.3f",vB);
 	
 	GPIOC -> BSRR = 1 << 1;
 	lcd_goto(12,0);
@@ -296,11 +301,17 @@ char detectaCor()
 	HAL_Delay(250);
 	GPIOC -> BRR = 1 << 1;
 	vG = (3.3*(float)x)/4095;
+	lcd_goto(9,1);
+	printf("vG %2.3f",vG);
 	if(vB > 2.6 && vR > 2.6 && vG > 2.6)
 		return 'N';
 		
-	if(vB < 2.0)
+	if(vB < 1.8 && vR < 2.0 && vG < 2.6)
 		return 'B';
+	else if(vR < 1.4 && vB < 2.5 && vG < 2.5)
+		return 'R';
+	else if(vG > 2.0 && vB > 2.0 && vR > 1.4)
+		return 'G';
 	else return '?';
 	
 }
